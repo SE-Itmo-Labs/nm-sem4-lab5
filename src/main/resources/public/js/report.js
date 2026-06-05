@@ -31,13 +31,20 @@ ${"X".padEnd(15)} ${"Y".padEnd(15)}
 
         for (let i = 0; i < allPoints.length; i++) {
             report += `${allPoints[i].x.toFixed(4).padEnd(12)}${allPoints[i].y.toFixed(4).padEnd(12)}`;
+
             for (let j = 0; j < allPoints.length; j++) {
                 if (i + j < allPoints.length) {
-                    report += `${diffTable[i][j].toFixed(6).padEnd(12)}`;
+                    const val = diffTable[i][j];
+                    if (Number.isFinite(val)) {
+                        report += `${val.toFixed(6).padEnd(12)}`;
+                    } else {
+                        report += `${"—".padEnd(12)}`;
+                    }
                 } else {
                     report += `${"".padEnd(12)}`;
                 }
             }
+
             report += `\n`;
         }
     }

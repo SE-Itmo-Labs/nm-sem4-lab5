@@ -46,8 +46,10 @@ public class ApproxApi {
 
         // 3. POST /api/calculate
         app.post("/api/calculate", ctx -> {
+
             CalculateRequest req = ctx.bodyAsClass(CalculateRequest.class);
             if (req.points == null || req.points.length < 2) throw new ValidationException("Нужно минимум 2 точки");
+            if (req.points.length > 40) throw new ValidationException("Слишком много точек (максимум 40)");
 
             List<Point2D> points = new ArrayList<>();
 
@@ -117,11 +119,23 @@ public class ApproxApi {
                         points, 
                         x -> service.newtonFiniteBackward(points, points.size(), finDiff, x)));
                 }
+
+                double stirlingVal = service.stirling(points, points.size(), finDiff, targetX);
+                if (!Double.isNaN(stirlingVal)) {
+                    results.add(buildMethodResult("Стирлинг", stirlingVal, points, 
+                        x -> service.stirling(points, points.size(), finDiff, x)));
+                }
+
+                double besselVal = service.bessel(points, points.size(), finDiff, targetX);
+                if (!Double.isNaN(besselVal)) {
+                    results.add(buildMethodResult("Бессель", besselVal, points, 
+                        x -> service.bessel(points, points.size(), finDiff, x)));
+                }
             }
 
             double minX = points.get(0).x;
             double maxX = points.get(points.size() - 1).x;
-            String warning = (targetX < minX || targetX > maxX) ? "Внимание: Произошла экстраполяция функции, значения могут быть неточными" : null;
+            String warning = (targetX < minX || targetX > maxX) ? "!!! Произошла экстраполяция функции, значения могут быть неточными" : null;
 
             Map<String, Object> response = new HashMap<>();
             response.put("results", results);

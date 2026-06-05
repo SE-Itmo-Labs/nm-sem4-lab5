@@ -208,17 +208,25 @@ function renderDiffTable(points, diffTable, isEquidistant) {
     head.innerHTML = headHtml;
 
     let bodyHtml = '';
+
+
     for(let i = 0; i < points.length; i++) {
         bodyHtml += `<tr><td>${points[i].x.toFixed(3)}</td>`;
         for(let j = 0; j < points.length; j++) {
             if(i + j < points.length) {
-                bodyHtml += `<td>${diffTable[i][j].toFixed(4)}</td>`;
+                const val = diffTable[i][j];
+                if (Number.isFinite(val)) {
+                    bodyHtml += `<td>${val.toFixed(4)}</td>`;
+                } else {
+                    bodyHtml += `<td>—</td>`;
+                }
             } else {
                 bodyHtml += `<td></td>`;
             }
         }
-        bodyHtml += `</tr>`;
     }
+
+    
     body.innerHTML = bodyHtml;
     panel.style.display = 'block';
 }

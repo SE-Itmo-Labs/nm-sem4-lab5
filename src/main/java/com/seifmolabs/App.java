@@ -1,10 +1,9 @@
 package com.seifmolabs;
 
 import com.seifmolabs.api.ApproxApi;
+
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
-
-import java.util.Map;
 public class App {
     public static void main(String[] args) {
         var app = Javalin.create(config -> {
