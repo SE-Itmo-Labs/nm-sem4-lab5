@@ -120,30 +120,47 @@ public class InterpolationService {
         return result;
     }
 
+    // полиноминальные коэффициенты (Стирлинг)
     private double stirlingTerm(double t, int order) {
         if (order == 1) return t;
         if (order == 2) return t * t;
 
-        double term = (order % 2 == 0) ? t * t : t;
-        int limit = (order % 2 == 0) ? order / 2 - 1 : (order - 1) / 2;
+        double term = t;
+
+        int limit = (order - 1) / 2;
+
+        if (order % 2 == 0) {
+            term = t * t;
+            limit = order / 2 - 1;
+        }
+
         for (int i = 1; i <= limit; i++) {
             term *= (t * t - (i * i));
         }
+        
         return term;
     }
 
+    // полиноминальные коэффициенты (Бессель)
     private double besselTerm(double t, int order) {
         if (order == 1) return t - 0.5;
         if (order == 2) return t * (t - 1.0);
 
-        double term = (order % 2 == 0) ? t * (t - 1.0) : (t - 0.5) * t * (t - 1.0);
+        double term = (t - 0.5) * t * (t - 1.0);
+
+        if (order % 2 == 0) {
+            term = t * (t - 1.0);
+        }
+
         int m = order / 2;
+
         for (int i = 2; i <= m; i++) {
             term *= (t - i) * (t + i - 1.0);
         }
         return term;
     }
 
+    // Стирлинг
     public double stirling(List<Point2D> points, int n, double[][] diff, double x) {
 
         if (n < 3 || n % 2 == 0 || !isEquidistant(points, n)) return Double.NaN;
@@ -155,8 +172,17 @@ public class InterpolationService {
         double result = diff[centerIndex][0];
 
         if (n > 1) {
-            double d1Left = (centerIndex - 1 >= 0 && centerIndex - 1 < n - 1) ? diff[centerIndex - 1][1] : 0.0;
-            double d1Right = (centerIndex >= 0 && centerIndex < n - 1) ? diff[centerIndex][1] : 0.0;
+            double d1Left = 0.0;
+            double d1Right = 0.0;
+
+            if (centerIndex - 1 >= 0 && centerIndex - 1 < n - 1) {
+                d1Left = diff[centerIndex - 1][1];
+            }
+
+            if (centerIndex >= 0 && centerIndex < n - 1) {
+                d1Right = diff[centerIndex][1];
+            }
+
             result += t * (d1Left + d1Right) / 2.0;
         }
 
@@ -165,19 +191,29 @@ public class InterpolationService {
             double deltaY = 0.0;
 
             if (k % 2 == 0) {
+
                 int m = k / 2;
+
                 int idx = centerIndex - m;
+
                 if (idx >= 0 && idx < n - k) {
+
                     deltaY = diff[idx][k];
+
                 } else {
                     break;
                 }
             } else {
+
                 int m = (k - 1) / 2;
+
                 int idx1 = centerIndex - m - 1;
                 int idx2 = centerIndex - m;
+
                 if (idx1 >= 0 && idx1 < n - k && idx2 >= 0 && idx2 < n - k) {
+
                     deltaY = (diff[idx1][k] + diff[idx2][k]) / 2.0;
+
                 } else {
                     break;
                 }
@@ -187,6 +223,7 @@ public class InterpolationService {
         return result;
     }
 
+    // Бессель
     public double bessel(List<Point2D> points, int n, double[][] diff, double x) {
 
         if (n < 4 || n % 2 == 1 || !isEquidistant(points, n)) return Double.NaN;
@@ -203,7 +240,7 @@ public class InterpolationService {
 
         for (int k = 1; k < n; k++) {
 
-            double deltaY;
+            double deltaY = 0;
 
             double term = besselTerm(t, k);
 

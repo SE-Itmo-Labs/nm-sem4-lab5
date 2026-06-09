@@ -24,7 +24,7 @@ export function displayResults(results) {
       let errorHtml = '';
       if (exactValue !== null && res.name !== 'Исходная функция') {
           const err = Math.abs(exactValue - res.targetValue);
-          errorHtml = `<br><small style="color:#666;">Погрешность: ${err.toExponential(4)}</small>`;
+          // errorHtml = `<br><small style="color:#666;">Погрешность: ${err.toExponential(4)}</small>`;
       }
       
       html += `
